@@ -7,4 +7,12 @@
     <RootNamespace>EDM_SITEK</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Tmp_Dir\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
 </Project>

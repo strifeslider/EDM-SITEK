@@ -1,8 +1,7 @@
-﻿
-using Newtonsoft.Json;
-using System.IO;
+﻿using Newtonsoft.Json;
+using System.IO.Compression;
 using System.Net;
-using System.Runtime;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EDM_SITEK
 {
@@ -28,10 +27,15 @@ namespace EDM_SITEK
 
             FIAS_Url_Data data = await API_Call();
             DirectoryInfo dirInfo = new DirectoryInfo(Tmp_Dir);
-            
-            dirInfo.CreateSubdirectory(data.Date);
-            
-            webClient.DownloadFile(data.GarXMLDeltaURL, Tmp_Dir + data.Date+ ".zip");
+
+            dirInfo.CreateSubdirectory(data.Date + "/");
+
+            webClient.DownloadFile(data.GarXMLDeltaURL, Tmp_Dir + data.Date + "/arcive.zip");
+        }
+        public async Task Unarcive()
+        {
+            FIAS_Url_Data data = await API_Call();
+            ZipFile.ExtractToDirectory(Tmp_Dir + data.Date + "/arcive.zip", Tmp_Dir + data.Date+"/");
         }
     }
 }

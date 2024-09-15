@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.IO;
 using System.IO.Compression;
 using System.Net;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -14,7 +15,7 @@ namespace EDM_SITEK
         WebClient webClient = new WebClient();
         string FIAS_Url = "https://fias.nalog.ru/WebServices/Public/GetLastDownloadFileInfo";
         string Tmp_Dir = "Tmp_Dir/";
-        async Task<FIAS_Url_Data> API_Call()
+        public async Task<FIAS_Url_Data> API_Call()
         {
             HttpResponseMessage response = (await httpClient.GetAsync(FIAS_Url)).EnsureSuccessStatusCode();
             var ResponseBody = await response.Content.ReadAsStringAsync();
@@ -27,15 +28,23 @@ namespace EDM_SITEK
 
             FIAS_Url_Data data = await API_Call();
             DirectoryInfo dirInfo = new DirectoryInfo(Tmp_Dir);
+            if(!Directory.Exists(data.Date + "/"))
+            {
+                dirInfo.CreateSubdirectory(data.Date + "/");
+                webClient.DownloadFile(data.GarXMLDeltaURL, Tmp_Dir + data.Date + "/arcive.zip");
+            }
 
-            dirInfo.CreateSubdirectory(data.Date + "/");
-
-            webClient.DownloadFile(data.GarXMLDeltaURL, Tmp_Dir + data.Date + "/arcive.zip");
         }
         public async Task Unarcive()
         {
             FIAS_Url_Data data = await API_Call();
-            ZipFile.ExtractToDirectory(Tmp_Dir + data.Date + "/arcive.zip", Tmp_Dir + data.Date+"/");
+            if (Directory.Exists(Tmp_Dir + data.Date + "/arcive.zip"))
+            {
+                if(Directory.GetFiles(Tmp_Dir + data.Date + "/") == null)
+                {
+                    ZipFile.ExtractToDirectory(Tmp_Dir + data.Date + "/arcive.zip", Tmp_Dir + data.Date + "/");
+                }
+            }
         }
     }
 }

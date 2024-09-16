@@ -42,8 +42,10 @@ namespace EDM_SITEK
                             {
                                 using(DBMananger db = new DBMananger())
                                 {
-                                    db.data.AddRange(obj);
-                                    db.SaveChanges();
+                                    if (obj.ISACTIVE == 1) {
+                                        db.data.AddRange(obj);
+                                        db.SaveChanges();
+                                    }
                                 }
                             }
                         }

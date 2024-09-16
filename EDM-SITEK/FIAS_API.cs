@@ -38,13 +38,10 @@ namespace EDM_SITEK
         public async Task Unarcive()
         {
             FIAS_Url_Data data = await API_Call();
-            if (Directory.Exists(Tmp_Dir + data.Date + "/arcive.zip"))
-            {
-                if(Directory.GetFiles(Tmp_Dir + data.Date + "/") == null)
-                {
+           
+                
                     ZipFile.ExtractToDirectory(Tmp_Dir + data.Date + "/arcive.zip", Tmp_Dir + data.Date + "/");
-                }
-            }
+           
         }
     }
 }

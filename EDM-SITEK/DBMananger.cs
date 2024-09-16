@@ -3,6 +3,8 @@ using System.Text.RegularExpressions;
 using EDM_SITEK;
 using System.Xml.Serialization;
 using System.Runtime.Serialization;
+using System.Xml;
+using System;
 
 namespace EDM_SITEK
 {
@@ -16,7 +18,7 @@ namespace EDM_SITEK
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseMySql("server=sql7.freemysqlhosting.net;user=sql7731515;password=XqCtvUb5y7;database=sql7731515;",
-            new MySqlServerVersion(new Version(8, 0, 25)));
+            new MySqlServerVersion(new Version(5, 5, 62)));
         }
 
         public async Task DB_Upload()
@@ -29,21 +31,19 @@ namespace EDM_SITEK
                 string[] files = Directory.GetFiles(directory);
                 foreach (string file in files)
                 {;
-                    string pattern = @"^AS_ADDR_OBJ_2.*";
+                    string pattern = @"AS_ADDR_OBJ_\d";
                     if (Regex.IsMatch(file,pattern)) {
-                        XmlSerializer xmlSerializer = new XmlSerializer(typeof(OBJECT[]));
-                        using (FileStream fs = new FileStream(file, FileMode.Open))
+                        XmlSerializer xmlSerializer = new XmlSerializer(typeof(ADDRESSOBJECTS));
+                        using (FileStream fs = new FileStream(file, FileMode.OpenOrCreate))
                         {
-                            OBJECT[]? objct = xmlSerializer.Deserialize(fs) as OBJECT[];
-                            if(objct != null)
+                            ADDRESSOBJECTS? AddressObject = xmlSerializer.Deserialize(fs) as ADDRESSOBJECTS;
+                            List<OBJECT> objects = AddressObject.OBJECT;
+                            foreach (OBJECT obj in objects)
                             {
-                                foreach(OBJECT obj in objct)
+                                using(DBMananger db = new DBMananger())
                                 {
-                                    using (DBMananger dbMananger = new DBMananger())
-                                    {
-                                        dbMananger.data.AddRange(obj);
-                                        dbMananger.SaveChanges();
-                                    }
+                                    db.data.AddRange(obj);
+                                    db.SaveChanges();
                                 }
                             }
                         }

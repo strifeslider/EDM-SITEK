@@ -1,12 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
-using System.Xml;
+using EDM_SITEK;
+using System.Xml.Serialization;
+using System.Runtime.Serialization;
 
 namespace EDM_SITEK
 {
     public class DBMananger : DbContext
     {
-        public DbSet<FIAS_Url_Data> data { get; set; } = null!;
+        public DbSet<OBJECT> data { get; set; } = null!;
 
         public DBMananger() {
             Database.EnsureCreated();
@@ -24,20 +26,25 @@ namespace EDM_SITEK
             string WorkPath = "Tmp_Dir//" + data.Date;
             foreach (var directory in Directory.GetDirectories(WorkPath))
             {
-                XmlDocument xDoc = new XmlDocument();
                 string[] files = Directory.GetFiles(directory);
                 foreach (string file in files)
-                {
-                    
+                {;
                     string pattern = @"^AS_ADDR_OBJ_2.*";
                     if (Regex.IsMatch(file,pattern)) {
-                        xDoc.Load(file);
-                        XmlElement? xRoot = xDoc.DocumentElement;
-                        foreach (XmlElement xnode in xRoot)
+                        XmlSerializer xmlSerializer = new XmlSerializer(typeof(OBJECT[]));
+                        using (FileStream fs = new FileStream(file, FileMode.Open))
                         {
-                            if( xnode.Name == "OBJECT")
+                            OBJECT[]? objct = xmlSerializer.Deserialize(fs) as OBJECT[];
+                            if(objct != null)
                             {
-
+                                foreach(OBJECT obj in objct)
+                                {
+                                    using (DBMananger dbMananger = new DBMananger())
+                                    {
+                                        dbMananger.data.AddRange(obj);
+                                        dbMananger.SaveChanges();
+                                    }
+                                }
                             }
                         }
                     }

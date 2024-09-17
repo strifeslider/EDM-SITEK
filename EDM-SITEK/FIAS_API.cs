@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System.IO;
 using System.IO.Compression;
 using System.Net;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EDM_SITEK
 {
@@ -38,13 +36,12 @@ namespace EDM_SITEK
         public async Task Unarcive()
         {
             FIAS_Url_Data data = await API_Call();
-            string dirpath = Tmp_Dir + data.Date + "/";
-            if (Directory.GetDirectories(dirpath) != null)
+            string dirpath = Tmp_Dir + data.Date + "/01";
+            string[] pattern = Array.Empty<string>(); 
+            if (Directory.Exists(dirpath) == false)
             {
                 ZipFile.ExtractToDirectory(Tmp_Dir + data.Date + "/arcive.zip", Tmp_Dir + data.Date + "/");
             }
-                    
-           
         }
     }
 }

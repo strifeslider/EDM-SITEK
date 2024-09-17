@@ -12,9 +12,11 @@ namespace EDM_SITEK
     {
         public DbSet<OBJECT> data { get; set; } = null!;
 
-        public DBMananger() {
+        public DBMananger()
+        {
             Database.EnsureCreated();
         }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseMySql("server=sql7.freemysqlhosting.net;user=sql7731515;password=XqCtvUb5y7;database=sql7731515;",
@@ -26,13 +28,15 @@ namespace EDM_SITEK
             FIAS_API Fias_api = new FIAS_API();
             FIAS_Url_Data data = await Fias_api.API_Call();
             string WorkPath = "Tmp_Dir//" + data.Date;
+
             foreach (var directory in Directory.GetDirectories(WorkPath))
             {
                 string[] files = Directory.GetFiles(directory);
                 foreach (string file in files)
-                {;
+                {
                     string pattern = @"AS_ADDR_OBJ_\d";
-                    if (Regex.IsMatch(file,pattern)) {
+                    if (Regex.IsMatch(file, pattern))
+                    {
                         XmlSerializer xmlSerializer = new XmlSerializer(typeof(ADDRESSOBJECTS));
                         using (FileStream fs = new FileStream(file, FileMode.OpenOrCreate))
                         {
@@ -40,9 +44,10 @@ namespace EDM_SITEK
                             List<OBJECT> objects = AddressObject.OBJECT;
                             foreach (OBJECT obj in objects)
                             {
-                                using(DBMananger db = new DBMananger())
+                                if (!ExistInDatabase(obj.ID, this))
                                 {
-                                    if (obj.ISACTIVE == 1) {
+                                    using (DBMananger db = new DBMananger())
+                                    {
                                         db.data.AddRange(obj);
                                         db.SaveChanges();
                                     }
@@ -52,6 +57,11 @@ namespace EDM_SITEK
                     }
                 }
             }
+        }
+
+        private bool ExistInDatabase(int id, DBMananger db)
+        {
+            return db?.data?.Any(o => o.ID == id) ?? false;
         }
     }
 }
